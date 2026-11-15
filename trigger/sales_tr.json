@@ -1,0 +1,25 @@
+{
+	"name": "sales_tr",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "day1",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 1,
+				"startTime": "2026-11-06T11:10:00",
+				"endTime": "2026-11-07T11:10:00",
+				"timeZone": "India Standard Time"
+			}
+		}
+	}
+}

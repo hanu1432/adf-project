@@ -1,0 +1,15 @@
+{
+	"name": "samplekranthidf",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "indonesiacentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "dd56313c-011a-46f4-884b-0af7c27aa7e5",
+		"tenantId": "4560489a-248b-4f03-a3b5-24ecc91ee720"
+	}
+}

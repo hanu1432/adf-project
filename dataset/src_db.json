@@ -1,0 +1,17 @@
+{
+	"name": "src_db",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "My_sql_lnk",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Customers"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
