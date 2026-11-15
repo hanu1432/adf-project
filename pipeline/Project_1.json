@@ -1,0 +1,239 @@
+{
+	"name": "Project_1",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.Rel_Url",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "source_files",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "HttpReadSettings",
+										"requestMethod": "GET"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"dataset": {
+									"referenceName": "api_dt",
+									"type": "DatasetReference",
+									"parameters": {
+										"Rel_Url": {
+											"value": "@item().FileName",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "lookup",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@concat(\n    'SELECT lastmodifeddate FROM water.lastmodifiles WHERE Tablename = ''',\n    replace(last(split(item().FileName,'/')),'.csv',''),\n    ''''\n)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "src_db",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "If Condition1",
+							"description": "",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "source_files",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "lookup",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@if(\n    equals(last(split(item().FileName,'/')),'products.csv'),\n    true,\n    greater(\n        ticks(\n            if(\n                equals(last(split(item().FileName,'/')),'customers.csv'),\n                activity('source_files').output.firstRow.signup_date,\n                if(\n                    equals(last(split(item().FileName,'/')),'orders.csv'),\n                    activity('source_files').output.firstRow.order_date,\n                    activity('source_files').output.firstRow.payment_date\n                )\n            )\n        ),\n        ticks(activity('lookup').output.firstRow.lastmodifeddate)\n    )\n)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Copy data1",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "DelimitedTextSource",
+												"storeSettings": {
+													"type": "HttpReadSettings",
+													"requestMethod": "GET"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextReadSettings"
+												}
+											},
+											"sink": {
+												"type": "DelimitedTextSink",
+												"storeSettings": {
+													"type": "AzureBlobFSWriteSettings"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextWriteSettings",
+													"quoteAllText": true,
+													"fileExtension": ".txt"
+												}
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "api_dt",
+												"type": "DatasetReference",
+												"parameters": {
+													"Rel_Url": {
+														"value": "@item().FileName",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "final_output",
+												"type": "DatasetReference",
+												"parameters": {
+													"filname": {
+														"value": "@last(split(item().FileName,'/'))",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Script1",
+										"type": "Script",
+										"dependsOn": [
+											{
+												"activity": "Copy data1",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"linkedServiceName": {
+											"referenceName": "My_sql_lnk",
+											"type": "LinkedServiceReference"
+										},
+										"typeProperties": {
+											"scripts": [
+												{
+													"type": "NonQuery",
+													"text": {
+														"value": "@concat(\n    'UPDATE water.lastmodifiles SET lastmodifeddate = ',\n    if(\n        equals(last(split(item().FileName,'/')),'products.csv'),\n        'SYSUTCDATETIME()',\n        concat(\n            '''',\n            string(\n                if(\n                    equals(last(split(item().FileName,'/')),'customers.csv'),\n                    activity('source_files').output.firstRow.signup_date,\n                    if(\n                        equals(last(split(item().FileName,'/')),'orders.csv'),\n                        activity('source_files').output.firstRow.order_date,\n                        activity('source_files').output.firstRow.payment_date\n                    )\n                )\n            ),\n            ''''\n        )\n    ),\n    ', soruce_count = ',\n    string(activity('copy data1').output.rowsRead),\n    ', dst_count = ',\n    string(activity('copy data1').output.rowsCopied),\n    ', total_count = ISNULL(total_count,0) + ',\n    string(activity('copy data1').output.rowsCopied),\n    ' WHERE Tablename = ''',\n    replace(last(split(item().FileName,'/')),'.csv',''),\n    ''';'\n)",
+														"type": "Expression"
+													}
+												}
+											],
+											"scriptBlockExecutionTimeout": "02:00:00"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Rel_Url": {
+				"type": "array",
+				"defaultValue": [
+					{
+						"FileName": "hanu1432/data_sets_e_commerce/refs/heads/main/customers.csv"
+					},
+					{
+						"FileName": "hanu1432/data_sets_e_commerce/refs/heads/main/orders.csv"
+					},
+					{
+						"FileName": "hanu1432/data_sets_e_commerce/refs/heads/main/payments.csv"
+					},
+					{
+						"FileName": "hanu1432/data_sets_e_commerce/refs/heads/main/products.csv"
+					}
+				]
+			}
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,54 @@
+{
+	"name": "final_output",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "adlsgen_lk",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"filname": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().filname",
+					"type": "Expression"
+				},
+				"folderPath": "Products_comapany",
+				"fileSystem": "silver"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			}
+		]
+	}
+}

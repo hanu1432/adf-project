@@ -1,0 +1,30 @@
+{
+	"name": "api_dt",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Api_lnk",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Rel_Url": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": {
+					"value": "@dataset().Rel_Url",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
