@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "samplekranthidf"
+		},
+		"adlsgen_lk_accountKey": {
+			"value": ""
+		},
+		"db_final_lk_accountKey": {
+			"value": ""
+		},
+		"raw_ls_connectionString": {
+			"value": ""
+		},
+		"Api_lnk_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/"
+		},
+		"My_sql_lnk_properties_typeProperties_server": {
+			"value": "kran2.database.windows.net"
+		},
+		"My_sql_lnk_properties_typeProperties_database": {
+			"value": "E-commerce Database"
+		},
+		"adlsgen_lk_properties_typeProperties_url": {
+			"value": "https://sampledata11.dfs.core.windows.net/"
+		},
+		"db_final_lk_properties_typeProperties_url": {
+			"value": "https://sampledata11.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

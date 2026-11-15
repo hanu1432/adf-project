@@ -1,0 +1,118 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "samplekranthidf"
+		},
+		"adlsgen_lk_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adlsgen_lk'"
+		},
+		"db_final_lk_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'db_final_lk'"
+		},
+		"raw_ls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'raw_ls'"
+		},
+		"Api_lnk_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/"
+		},
+		"My_sql_lnk_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "kran2.database.windows.net"
+		},
+		"My_sql_lnk_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "E-commerce Database"
+		},
+		"adlsgen_lk_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://sampledata11.dfs.core.windows.net/"
+		},
+		"db_final_lk_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://sampledata11.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "samplekranthidf_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"adlsgen_lk_accountKey": {
+						"value": "[parameters('adlsgen_lk_accountKey')]"
+					},
+					"db_final_lk_accountKey": {
+						"value": "[parameters('db_final_lk_accountKey')]"
+					},
+					"raw_ls_connectionString": {
+						"value": "[parameters('raw_ls_connectionString')]"
+					},
+					"Api_lnk_properties_typeProperties_url": {
+						"value": "[parameters('Api_lnk_properties_typeProperties_url')]"
+					},
+					"My_sql_lnk_properties_typeProperties_server": {
+						"value": "[parameters('My_sql_lnk_properties_typeProperties_server')]"
+					},
+					"My_sql_lnk_properties_typeProperties_database": {
+						"value": "[parameters('My_sql_lnk_properties_typeProperties_database')]"
+					},
+					"adlsgen_lk_properties_typeProperties_url": {
+						"value": "[parameters('adlsgen_lk_properties_typeProperties_url')]"
+					},
+					"db_final_lk_properties_typeProperties_url": {
+						"value": "[parameters('db_final_lk_properties_typeProperties_url')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "samplekranthidf_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'samplekranthidf_ArmTemplate_0')]"
+			]
+		}
+	]
+}
