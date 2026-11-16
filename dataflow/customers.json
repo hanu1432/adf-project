@@ -1,0 +1,108 @@
+{
+	"name": "customers",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "src_dt",
+						"type": "DatasetReference"
+					},
+					"name": "customers"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "adlsgen_lk",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "datatypes"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          customer_id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          phone as string,",
+				"          city as string,",
+				"          country as string,",
+				"          signup_date as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     limit: 100,",
+				"     ignoreNoFilesFound: false) ~> customers",
+				"customers cast(output(",
+				"          customer_id as integer,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          phone as long,",
+				"          city as string,",
+				"          country as string,",
+				"          signup_date as date",
+				"     ),",
+				"     errors: true) ~> datatypes",
+				"datatypes derive(Full_name = concat(first_name,' ', last_name)) ~> derivedColumn1",
+				"select1 alterRow(upsertIf(true())) ~> alterRow1",
+				"derivedColumn1 select(mapColumn(",
+				"          Customer_id = customer_id,",
+				"          Full_name,",
+				"          Email = email,",
+				"          Phone = phone,",
+				"          City = city,",
+				"          Country = country,",
+				"          Signup_date = signup_date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'silver_layer',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Customer_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          Customer_id,",
+				"          Full_name,",
+				"          Email,",
+				"          Phone,",
+				"          City,",
+				"          Country,",
+				"          Signup_date",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
