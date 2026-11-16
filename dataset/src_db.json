@@ -5,12 +5,20 @@
 			"referenceName": "My_sql_lnk",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"table_names": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
 			"schema": "water",
-			"table": "lastmodifiles"
+			"table": {
+				"value": "@dataset().table_names",
+				"type": "Expression"
+			}
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"
