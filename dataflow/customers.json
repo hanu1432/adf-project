@@ -23,7 +23,14 @@
 						"referenceName": "products",
 						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "Prducts"
+				},
+				{
+					"dataset": {
+						"referenceName": "payments",
+						"type": "DatasetReference"
+					},
+					"name": "Payments"
 				}
 			],
 			"sinks": [
@@ -47,6 +54,13 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "Products"
+				},
+				{
+					"linkedService": {
+						"referenceName": "adlsgen_lk",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2"
 				}
 			],
 			"transformations": [
@@ -73,6 +87,12 @@
 				},
 				{
 					"name": "alterRow3"
+				},
+				{
+					"name": "select4"
+				},
+				{
+					"name": "alterRow4"
 				}
 			],
 			"scriptLines": [
@@ -111,7 +131,19 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> source1",
+				"     ignoreNoFilesFound: false) ~> Prducts",
+				"source(output(",
+				"          payment_id as integer,",
+				"          order_id as integer,",
+				"          payment_date as date,",
+				"          payment_method as string,",
+				"          payment_status as string,",
+				"          payment_amount as double,",
+				"          currency as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> Payments",
 				"customers cast(output(",
 				"          customer_id as integer,",
 				"          first_name as string,",
@@ -147,7 +179,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
 				"select2 alterRow(upsertIf(true())) ~> alterRow2",
-				"source1 select(mapColumn(",
+				"Prducts select(mapColumn(",
 				"          Product_id = product_id,",
 				"          Product_name = product_name,",
 				"          Category = category,",
@@ -158,11 +190,23 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
 				"select3 alterRow(upsertIf(true())) ~> alterRow3",
+				"Payments select(mapColumn(",
+				"          Payment_id = payment_id,",
+				"          Order_id = order_id,",
+				"          Payment_date = payment_date,",
+				"          Payment_method = payment_method,",
+				"          Payment_status = payment_status,",
+				"          Payment_amount = payment_amount,",
+				"          Currency = currency",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select4",
+				"select4 alterRow(upsertIf(true())) ~> alterRow4",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'silver',",
-				"     folderPath: 'silver_layer',",
+				"     folderPath: 'silver_layer/Customers',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
@@ -190,7 +234,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'silver',",
-				"     folderPath: 'silver_layer',",
+				"     folderPath: 'silver_layer/Orders',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
@@ -209,7 +253,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'silver',",
-				"     folderPath: 'silver_layer',",
+				"     folderPath: 'silver_layer/Products',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
@@ -223,7 +267,25 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> Products"
+				"     skipDuplicateMapOutputs: true) ~> Products",
+				"alterRow4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'silver_layer/payments',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2"
 			]
 		}
 	}
