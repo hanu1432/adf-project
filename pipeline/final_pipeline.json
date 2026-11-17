@@ -34,6 +34,10 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"pipeline": {
+						"referenceName": "data_flow",
+						"type": "PipelineReference"
+					},
 					"waitOnCompletion": true
 				}
 			}
