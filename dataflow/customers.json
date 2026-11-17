@@ -10,6 +10,20 @@
 						"type": "DatasetReference"
 					},
 					"name": "customers"
+				},
+				{
+					"dataset": {
+						"referenceName": "orders",
+						"type": "DatasetReference"
+					},
+					"name": "orders"
+				},
+				{
+					"dataset": {
+						"referenceName": "products",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
 				}
 			],
 			"sinks": [
@@ -19,6 +33,20 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "sink1"
+				},
+				{
+					"linkedService": {
+						"referenceName": "adlsgen_lk",
+						"type": "LinkedServiceReference"
+					},
+					"name": "Orddetails"
+				},
+				{
+					"linkedService": {
+						"referenceName": "adlsgen_lk",
+						"type": "LinkedServiceReference"
+					},
+					"name": "Products"
 				}
 			],
 			"transformations": [
@@ -33,6 +61,18 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "alterRow2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "alterRow3"
 				}
 			],
 			"scriptLines": [
@@ -50,6 +90,28 @@
 				"     validateSchema: false,",
 				"     limit: 100,",
 				"     ignoreNoFilesFound: false) ~> customers",
+				"source(output(",
+				"          order_id as integer,",
+				"          customer_id as integer,",
+				"          product_id as integer,",
+				"          quantity as integer,",
+				"          order_date as date,",
+				"          order_status as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> orders",
+				"source(output(",
+				"          product_id as integer,",
+				"          product_name as string,",
+				"          category as string,",
+				"          price as double,",
+				"          stock_quantity as integer,",
+				"          brand as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
 				"customers cast(output(",
 				"          customer_id as integer,",
 				"          first_name as string,",
@@ -74,6 +136,28 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
+				"orders select(mapColumn(",
+				"          Order_id = order_id,",
+				"          Customer_id = customer_id,",
+				"          Product_id = product_id,",
+				"          Quantity = quantity,",
+				"          Order_date = order_date,",
+				"          Order_status = order_status",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 alterRow(upsertIf(true())) ~> alterRow2",
+				"source1 select(mapColumn(",
+				"          Product_id = product_id,",
+				"          Product_name = product_name,",
+				"          Category = category,",
+				"          Price = price,",
+				"          Stock_quantity = stock_quantity,",
+				"          Brand = brand",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select3 alterRow(upsertIf(true())) ~> alterRow3",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -101,7 +185,45 @@
 				"          City,",
 				"          Country,",
 				"          Signup_date",
-				"     )) ~> sink1"
+				"     )) ~> sink1",
+				"alterRow2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'silver_layer',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Order_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> Orddetails",
+				"alterRow3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'silver_layer',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Product_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> Products"
 			]
 		}
 	}
