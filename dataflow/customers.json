@@ -108,7 +108,7 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     limit: 100,",
+				"     limit: 0,",
 				"     ignoreNoFilesFound: false) ~> customers",
 				"source(output(",
 				"          order_id as integer,",
